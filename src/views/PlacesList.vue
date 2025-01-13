@@ -15,6 +15,7 @@
     </ion-header>
     <ion-content style="--background: #1a1a1a;">
       <div class="places-list">
+        <p class="no-places" v-if="places == 0">Brak danych</p>
         <div class="place-item" v-for="(place, index) in places" :key="index">
           <div class="place-thumbnail">
             <img :src="place.image" alt="Obrazek miejsca" />
@@ -93,6 +94,10 @@ export default {
 <style scoped>
 ion-title {
   color: #abaaaa;
+}
+
+.no-places {
+  text-align: center;
 }
 
 .places-list {

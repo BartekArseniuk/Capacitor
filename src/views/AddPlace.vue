@@ -31,13 +31,16 @@
         <div class="form-group">
           <label for="image">Dodaj zdjęcie</label>
           <div class="file-upload-wrapper">
-            <input id="image" type="file" @change="onFileChange" required class="file-input" />
+            <input id="image" type="file" @change="onFileChange" class="file-input" />
             <button type="button" class="file-button" @click="triggerFileInput">
-              Wybierz plik
+              <ion-icon :icon="ImageIcon"></ion-icon>
             </button>
-            <span v-if="file" class="file-name">{{ file.name }}</span>
+            <button type="button" class="camera-button" @click="openCamera">
+              <ion-icon :icon="CameraIcon"></ion-icon>
+            </button>
           </div>
         </div>
+        <span v-if="file" class="file-name">Zdjęcie dodane</span>
         <button class="submit-button" type="submit">Dodaj</button>
       </form>
     </ion-content>
@@ -46,7 +49,8 @@
 
 <script>
 import { IonModal, IonHeader, IonToolbar, IonTitle } from '@ionic/vue';
-import { close as closeIcon } from 'ionicons/icons';
+import { close as closeIcon, camera as CameraIcon, image as ImageIcon } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 export default {
   components: { IonModal, IonHeader, IonToolbar, IonTitle },
@@ -67,6 +71,8 @@ export default {
       },
       file: null,
       closeIcon,
+      CameraIcon,
+      ImageIcon
     };
   },
   mounted() {
@@ -84,10 +90,19 @@ export default {
     onFileChange(event) {
       this.file = event.target.files[0];
     },
+    async openCamera() {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+      });
+      this.file = image.dataUrl;
+    },
     resetForm() {
       this.place = {
         name: '',
-        date: '',
+        date: this.place.date,
         location: '',
         description: '',
         image: '',
@@ -95,7 +110,11 @@ export default {
       this.file = null;
     },
     async submitForm() {
-      if (this.file) {
+      if (!this.file) {
+        alert("Zrób zdjęcie lub wybierz z galerii.");
+        return;
+      }
+      if (this.file instanceof Blob) {
         const fileReader = new FileReader();
         fileReader.onload = (e) => {
           this.place.image = e.target.result;
@@ -104,8 +123,13 @@ export default {
           this.closeModal();
         };
         fileReader.readAsDataURL(this.file);
+      } else if (typeof this.file === 'string') {
+        this.place.image = this.file;
+        this.$emit('add-place', { ...this.place });
+        this.resetForm();
+        this.closeModal();
       }
-    },
+    }
   },
 };
 </script>
@@ -179,16 +203,21 @@ ion-footer {
   display: none;
 }
 
-.file-button {
+.file-button,
+.camera-button {
   background-color: #413d3d;
   color: white;
   padding: 10px 15px;
   border-radius: 12px;
   cursor: pointer;
   border: none;
-  margin-top: 10px;
   font-size: 16px;
   transition: background-color 0.3s ease;
+}
+
+.file-button:hover,
+.camera-button:hover {
+  background-color: #575757;
 }
 
 .file-name {
@@ -211,8 +240,7 @@ ion-footer {
   transition: background-color 0.3s ease;
 }
 
-.submit-button:hover,
-.file-button:hover {
+.submit-button:hover {
   background-color: #575757;
 }
 </style>
