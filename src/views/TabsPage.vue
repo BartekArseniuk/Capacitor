@@ -2,15 +2,15 @@
   <ion-page>
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
-      <ion-tab-bar slot="bottom">
+      <ion-tab-bar style="--background: #222428;" slot="bottom">
         <ion-tab-button tab="tab1" href="/tabs/tab1">
           <ion-icon aria-hidden="true" :icon="imagesOutline" />
           <ion-label>Galeria</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="tab2" href="/tabs/tab2">
-          <ion-icon aria-hidden="true" :icon="addCircleOutline" />
-          <ion-label>Dodaj miejsce</ion-label>
+          <ion-icon aria-hidden="true" :icon="readerOutline" />
+          <ion-label>Informacje</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -19,5 +19,5 @@
 
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { imagesOutline, addCircleOutline } from 'ionicons/icons';  // Zmieniono na images-outline
+import { imagesOutline, readerOutline } from 'ionicons/icons';
 </script>
