@@ -1,5 +1,5 @@
 <template>
-  <ion-modal :is-open="isOpen" @ionModalDidDismiss="closeModal">
+  <ion-modal :is-open="isOpen" @ionModalDidDismiss="closeModal" @ionModalWillPresent="getLocation">
     <ion-header>
       <ion-toolbar style="--background: #222428;">
         <ion-title>Dodaj miejsce</ion-title>
@@ -22,7 +22,7 @@
         </div>
         <div class="form-group">
           <label for="location">Lokalizacja</label>
-          <input id="location" type="text" v-model="place.location" required />
+          <input id="location" type="text" v-model="place.location" placeholder="Wczytywanie lokalizacji..." disabled />
         </div>
         <div class="form-group">
           <label for="description">Opis</label>
@@ -128,6 +128,37 @@ export default {
         this.$emit('add-place', { ...this.place });
         this.resetForm();
         this.closeModal();
+      }
+    },
+    getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            this.fetchAddressFromCoordinates(latitude, longitude);
+          },
+          (error) => {
+            console.error("Błąd geolokalizacji: ", error);
+            alert("Nie udało się uzyskać lokalizacji.");
+          }
+        );
+      } else {
+        alert("Geolokalizacja nie jest wspierana w tej przeglądarce.");
+      }
+    },
+    async fetchAddressFromCoordinates(latitude, longitude) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`);
+        const data = await response.json();
+        if (data && data.address) {
+          const city = data.address.city || data.address.town || data.address.village;
+          const country = data.address.country;
+          this.place.location = `${city}, ${country}`;
+        }
+      } catch (error) {
+        console.error("Błąd podczas pobierania adresu:", error);
+        this.place.location = "Nie udało się uzyskać lokalizacji";
       }
     }
   },
