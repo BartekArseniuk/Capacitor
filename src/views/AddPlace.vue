@@ -92,7 +92,6 @@ export default {
     },
     async openCamera() {
       const image = await Camera.getPhoto({
-        quality: 90,
         allowEditing: false,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
