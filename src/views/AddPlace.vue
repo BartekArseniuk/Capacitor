@@ -1,5 +1,5 @@
 <template>
-  <ion-modal :is-open="isOpen" @ionModalDidDismiss="closeModal" @ionModalWillPresent="getLocation">
+  <ion-modal :is-open="isOpen" @ionModalDidDismiss="closeModal">
     <ion-header>
       <ion-toolbar style="--background: #222428;">
         <ion-title>Dodaj miejsce</ion-title>
@@ -75,9 +75,13 @@ export default {
       ImageIcon
     };
   },
-  mounted() {
-    const today = new Date().toISOString().split('T')[0];
-    this.place.date = today;
+  watch: {
+    isOpen(newValue) {
+      if (newValue) {
+        this.getLocation();
+        this.getDate();
+      }
+    },
   },
   methods: {
     closeModal() {
@@ -101,7 +105,7 @@ export default {
     resetForm() {
       this.place = {
         name: '',
-        date: this.place.date,
+        date: '',
         location: '',
         description: '',
         image: '',
@@ -122,12 +126,16 @@ export default {
           this.closeModal();
         };
         fileReader.readAsDataURL(this.file);
-      } else if (typeof this.file === 'string') {
+      } if (typeof this.file === 'string') {
         this.place.image = this.file;
         this.$emit('add-place', { ...this.place });
         this.resetForm();
         this.closeModal();
       }
+    },
+    getDate() {
+      const today = new Date().toISOString().split('T')[0];
+      this.place.date = today;
     },
     getLocation() {
       if (navigator.geolocation) {
@@ -148,7 +156,9 @@ export default {
     },
     async fetchAddressFromCoordinates(latitude, longitude) {
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+        );
         const data = await response.json();
         if (data && data.address) {
           const city = data.address.city || data.address.town || data.address.village;
