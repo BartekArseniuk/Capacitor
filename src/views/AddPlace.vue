@@ -18,7 +18,7 @@
         </div>
         <div class="form-group">
           <label for="date">Data</label>
-          <input id="date" type="date" v-model="place.date" disabled readonly />
+          <input id="date" type="date" v-model="place.date" disabled />
         </div>
         <div class="form-group">
           <label for="location">Lokalizacja</label>
@@ -126,7 +126,7 @@ export default {
           this.closeModal();
         };
         fileReader.readAsDataURL(this.file);
-      } if (typeof this.file === 'string') {
+      } if (typeof this.file == 'string') {
         this.place.image = this.file;
         this.$emit('add-place', { ...this.place });
         this.resetForm();
